@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>泡泡花朵动漫日历</title>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'ZCOOL KuaiLe', "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #2a2a4a 0%, #4a4a6a 100%);
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-x: hidden;
+        }
+        .calendar-card {
+            max-width: 100%; 
+            width: 100%;
+            margin: 0;
+            background: rgba(40, 40, 60, 0.85);
+            border-radius: 0;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            border: 3px solid #8a6dcc;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            overflow: hidden; /* 确保泡泡不溢出卡片 */
+        }
+        .time-date-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(50, 50, 70, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #66cccc;
+            position: relative;
+            overflow: hidden;
+        }
+        .time-date-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8a6dcc, #66cccc, #ff99cc);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+        .time-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+        .current-time {
+            font-size: 24px;
+            color: #66cccc;
+            text-shadow: 0 0 10px rgba(102, 204, 204, 0.5);
+            font-weight: bold;
+        }
+        .current-date {
+            font-size: 16px;
+            color: #ff99cc;
+            font-weight: bold;
+        }
+        .greeting-text {
+            text-align: center;
+            font-size: 18px;
+            color: #ffcc66;
+            text-shadow: 0 0 5px rgba(255, 204, 102, 0.3);
+            padding: 6px 15px;
+            background: rgba(60, 60, 80, 0.7);
+            border-radius: 20px;
+            border: 2px solid #ffcc66;
+        }
+        .all-holidays-count {
+            background: rgba(50, 50, 70, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #8a6dcc;
+            position: relative;
+            overflow: hidden;
+        }
+        .count-title {
+            font-size: 18px;
+            color: #66cccc;
+            text-align: center;
+            margin-bottom: 12px;
+            text-shadow: 0 0 5px rgba(102, 204, 204, 0.3);
+            padding-bottom: 5px;
+            border-bottom: 2px dotted #8a6dcc;
+        }
+        .holiday-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        .holiday-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(60, 60, 80, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .holiday-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        .holiday-item:hover::before {
+            left: 100%;
+        }
+        .holiday-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+            border-color: #66cccc;
+        }
+        .holiday-name {
+            font-size: 14px;
+            color: #ffcc66;
+            font-weight: bold;
+        }
+        .holiday-days {
+            font-size: 14px;
+            color: #ff99cc;
+            font-weight: bold;
+            background: rgba(255, 153, 204, 0.15);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .warm-sentence-section {
+            background: rgba(50, 50, 70, 0.7);
+            border-radius: 15px;
+            padding: 15px 10px 10px;
+            margin-bottom: 10px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #ff99cc;
+            overflow: hidden;
+        }
+        .warm-sentence-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 40px;
+            margin-bottom: 8px;
+            z-index: 2;
+        }
+        .warm-sentence {
+            text-align: center;
+            font-size: 16px;
+            color: #ffcc66;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+            width: 100%;
+            padding: 0 10px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 204, 102, 0.3);
+            z-index: 2;
+        }
+        .warm-sentence.active {
+            opacity: 1;
+        }
+        .signature {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        /* 花朵装饰 - 紧凑排列 */
+        .compact-flowers {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .compact-flower {
+            font-size: 22px;
+            animation: bounce 2s infinite alternate;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+        }
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+        .compact-flower:nth-child(1) { animation-delay: 0s; }
+        .compact-flower:nth-child(2) { animation-delay: 0.3s; }
+        
+        /* 泡泡效果 - 只在框内 */
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float-bubble 15s infinite ease-in;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        @keyframes float-bubble {
+            0% {
+                transform: translateY(0) translateX(0) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(20px) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        /* 响应式设计 - 手机优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            .calendar-card {
+                padding: 12px;
+            }
+            .time-date-container {
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+            .time-section {
+                gap: 10px;
+                margin-bottom: 6px;
+            }
+            .current-time {
+                font-size: 22px;
+            }
+            .current-date {
+                font-size: 14px;
+            }
+            .greeting-text {
+                font-size: 16px;
+                padding: 5px 12px;
+            }
+            .all-holidays-count {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            .count-title {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            .holiday-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 6px;
+            }
+            .holiday-item {
+                padding: 6px 8px;
+            }
+            .holiday-name, .holiday-days {
+                font-size: 12px;
+            }
+            .warm-sentence-section {
+                padding: 12px 8px 8px;
+                margin-bottom: 8px;
+            }
+            .warm-sentence-container {
+                min-height: 35px;
+            }
+            .compact-flower {
+                font-size: 20px;
+            }
+            .warm-sentence {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .holiday-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .current-time {
+                font-size: 20px;
+            }
+            .current-date {
+                font-size: 13px;
+            }
+            .greeting-text {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-card">
+        <!-- 泡泡容器 - 只在日历卡片内 -->
+        <div class="bubbles" id="bubbles"></div>
+        
+        <div class="time-date-container">
+            <div class="time-section">
+                <div class="current-time" id="currentTime"></div>
+                <div class="current-date" id="currentDate"></div>
+            </div>
+            <div class="greeting-text" id="greetingText"></div>
+        </div>
+        
+        <div class="all-holidays-count">
+            <div class="count-title">2026年法定节假日倒计时</div>
+            <div class="holiday-grid">
+                <div class="holiday-item">
+                    <div class="holiday-name">元旦</div>
+                    <div class="holiday-days" id="dayNewYear"></div>
+                </div>
+                <div class="holiday-item">
+                    <div class="holiday-name">春节</div>
+                    <div class="holiday-days" id="daySpringFestival"></div>
+                </div>
+                <div class="holiday-item">
+                    <div class="holiday-name">清明节</div>
+                    <div class="holiday-days" id="dayQingming"></div>
+                </div>
+                <div class="holiday-item">
+                    <div class="holiday-name">劳动节</div>
+                    <div class="holiday-days" id="dayLaborDay"></div>
+                </div>
+                <div class="holiday-item">
+                    <div class="holiday-name">端午节</div>
+                    <div class="holiday-days" id="dayDragonBoat"></div>
+                </div>
+                <div class="holiday-item">
+                    <div class="holiday-name">中秋节</div>
+                    <div class="holiday-days" id="dayMidAutumn"></div>
+                </div>
+                <div class="holiday-item">
+                    <div class="holiday-name">国庆节</div>
+                    <div class="holiday-days" id="dayNationalDay"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="warm-sentence-section">
+            <!-- 紧凑排列的两朵花 -->
+            <div class="compact-flowers">
+                <div class="compact-flower">🌸</div>
+                <div class="compact-flower">🌼</div>
+            </div>
+            
+            <div class="warm-sentence-container">
+                <div class="warm-sentence active" id="warmSentence1"></div>
+                <div class="warm-sentence" id="warmSentence2"></div>
+            </div>
+            
+            <div class="signature">© 2025 南离知识集</div>
+        </div>
+    </div>
+
+    <script>
+        // 创建泡泡效果 - 只在日历卡片内
+        function createBubbles() {
+            const bubblesContainer = document.getElementById('bubbles');
+            const bubbleCount = 20;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // 随机大小
+                const size = Math.random() * 40 + 10;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // 随机位置
+                bubble.style.left = `${Math.random() * 100}%`;
+                
+                // 随机延迟
+                bubble.style.animationDelay = `${Math.random() * 15}s`;
+                
+                // 随机动画时长
+                bubble.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                
+                bubblesContainer.appendChild(bubble);
+            }
+        }
+        
+        // 实时时间
+        function updateTimeDate() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const week = ['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
+            document.getElementById('currentDate').textContent = `${year}-${month}-${day} ${week}`;
+        }
+        updateTimeDate();
+        setInterval(updateTimeDate, 1000);
+
+        // 时段问候
+        function setGreeting() {
+            const hour = new Date().getHours();
+            const text = hour >=6 && hour<12 ? '早上好呀～' : 
+                        hour>=12&&hour<18 ? '中午好呀～' : '晚上好呀～';
+            document.getElementById('greetingText').textContent = text;
+        }
+        setGreeting();
+        setInterval(setGreeting, 3600000);
+
+        // 节假日倒计时
+        function calculateDays(targetDate) {
+            const now = new Date();
+            let target = new Date(targetDate);
+            target.setHours(23, 59, 59);
+            
+            if (target < now) {
+                target.setFullYear(now.getFullYear() + 1);
+            }
+            
+            const timeDiff = target - now;
+            return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        }
+
+        const holidays = {
+            newYear: new Date(2026, 0, 1),
+            springFestival: new Date(2026, 1, 17),
+            qingming: new Date(2026, 3, 4),
+            laborDay: new Date(2026, 4, 1),
+            dragonBoat: new Date(2026, 5, 19),
+            midAutumn: new Date(2026, 8, 25),
+            nationalDay: new Date(2026, 9, 1)
+        };
+
+        function updateAllHolidayDays() {
+            document.getElementById('dayNewYear').textContent = `${calculateDays(holidays.newYear)} 天`;
+            document.getElementById('daySpringFestival').textContent = `${calculateDays(holidays.springFestival)} 天`;
+            document.getElementById('dayQingming').textContent = `${calculateDays(holidays.qingming)} 天`;
+            document.getElementById('dayLaborDay').textContent = `${calculateDays(holidays.laborDay)} 天`;
+            document.getElementById('dayDragonBoat').textContent = `${calculateDays(holidays.dragonBoat)} 天`;
+            document.getElementById('dayMidAutumn').textContent = `${calculateDays(holidays.midAutumn)} 天`;
+            document.getElementById('dayNationalDay').textContent = `${calculateDays(holidays.nationalDay)} 天`;
+        }
+        updateAllHolidayDays();
+        setInterval(updateAllHolidayDays, 86400000);
+
+        // 温馨话语
+        const sentences = [
+            '累了就歇会儿，休息是为了更好出发～',
+            '今天的努力不会白费，坚持下去呀～',
+            '生活需要小确幸，记得给自己多些鼓励～',
+            '偶尔放慢脚步也没关系，明天继续向前～',
+            '每一点付出都有意义，你真的很棒呀～',
+            '别忘记喝水，照顾好自己才能更有力量～',
+            '今天也在认真生活，为这样的你点赞～',
+            '眼睛累了就远眺，让身心一起放个假～',
+            '努力的同时别焦虑，你已经在慢慢变好～',
+            '生活虽忙，也要留一点时间给自己～',
+            '哪怕进步一点点，也是值得开心的事～',
+            '累了就深呼吸，调整状态再继续加油～'
+        ];
+        
+        let currentSentenceIndex = 0;
+        
+        function setRandomSentence() {
+            const sentence1 = document.getElementById('warmSentence1');
+            const sentence2 = document.getElementById('warmSentence2');
+            
+            // 淡出当前句子
+            if (sentence1.classList.contains('active')) {
+                sentence1.classList.remove('active');
+                setTimeout(() => {
+                    sentence1.textContent = sentences[currentSentenceIndex];
+                    sentence1.classList.add('active');
+                }, 500);
+            } else {
+                sentence2.classList.remove('active');
+                setTimeout(() => {
+                    sentence2.textContent = sentences[currentSentenceIndex];
+                    sentence2.classList.add('active');
+                }, 500);
+            }
+            
+            currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+        }
+        
+        // 初始化两个句子
+        document.getElementById('warmSentence1').textContent = sentences[0];
+        document.getElementById('warmSentence2').textContent = sentences[1];
+        currentSentenceIndex = 2;
+        
+        // 每5秒切换一次
+        setInterval(setRandomSentence, 5000);
+        
+        // 创建泡泡效果
+        createBubbles();
+    </script>
+</body>
+</html>
